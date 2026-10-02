@@ -1,11 +1,5 @@
 const assert = require('assert');
-const { Given, When, Then, Before } = require('@cucumber/cucumber');
-
-let scenarioCount = 0;
-
-Before(function () {
-  scenarioCount += 1;
-});
+const { Given, When, Then } = require('@cucumber/cucumber');
 
 Given(/.*/, function () {
   // no-op setup
