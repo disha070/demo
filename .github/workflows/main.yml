@@ -31,28 +31,25 @@ jobs:
           python-version: '3.11'
 
       - name: Install Gherkin linter
-        run: npm install -g gherkin-lint
+        run: npx --yes gherkin-lint --version
 
       - name: Lint Gherkin feature files
         run: |
-          if [ -d features ] && find features -name "*.feature" | grep -q .; then
-            find features -name "*.feature" -print0 | xargs -0 -r gherkin-lint --config .github/workflows/.gherkin-lintrc
+          mkdir -p features
+          if find features -name "*.feature" | grep -q .; then
+            find features -name "*.feature" -print0 | xargs -0 -r npx --yes gherkin-lint --config .github/workflows/.gherkin-lintrc
           else
-            echo "No feature files found. Creating example feature."
-            mkdir -p features
             cat > features/example.feature <<'EOF'
 Feature: Example BDD workflow
   Scenario: Example passing scenario
     Given the project is configured
     Then the test should pass
 EOF
-            gherkin-lint --config .github/workflows/.gherkin-lintrc features/example.feature
+            npx --yes gherkin-lint --config .github/workflows/.gherkin-lintrc features/example.feature
           fi
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
-          npm install
-          npm install @cucumber/cucumber
           python -m pip install --upgrade pip
           pip install pytest pytest-bdd playwright
           playwright install --with-deps chromium
