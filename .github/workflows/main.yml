@@ -35,10 +35,10 @@ jobs:
 
       - name: Lint Gherkin feature files
         run: |
-          if [ -d features ]; then
-            gherkin-lint --config .github/workflows/.gherkin-lintrc features/
+          if [ -d features ] && find features -name "*.feature" | grep -q .; then
+            find features -name "*.feature" -print0 | xargs -0 -r gherkin-lint --config .github/workflows/.gherkin-lintrc
           else
-            echo "No features directory found. Creating example feature for validation."
+            echo "No feature files found. Creating example feature."
             mkdir -p features
             cat > features/example.feature <<'EOF'
 Feature: Example BDD workflow
@@ -46,11 +46,13 @@ Feature: Example BDD workflow
     Given the project is configured
     Then the test should pass
 EOF
-            gherkin-lint --config .github/workflows/.gherkin-lintrc features/
+            gherkin-lint --config .github/workflows/.gherkin-lintrc features/example.feature
           fi
 
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: |
+          npm install
+          npm install @cucumber/cucumber
           python -m pip install --upgrade pip
           pip install pytest pytest-bdd playwright
           playwright install --with-deps chromium
