@@ -35,11 +35,11 @@ jobs:
           mkdir -p features
           if ! find features -name "*.feature" | grep -q .; then
             cat > features/example.feature <<'EOF'
-Feature: Example BDD workflow
-  Scenario: Example passing scenario
-    Given the project is configured
-    Then the test should pass
-EOF
+          Feature: Example BDD workflow
+            Scenario: Example passing scenario
+              Given the project is configured
+              Then the test should pass
+          EOF
           fi
 
       - name: Lint Gherkin feature files
@@ -62,18 +62,18 @@ EOF
           mkdir -p tests
           if [ ! -f tests/test_example.py ]; then
             cat > tests/test_example.py <<'EOF'
-from pytest_bdd import scenarios, given, then
+          from pytest_bdd import scenarios, given, then
 
-scenarios("../features/example.feature")
+          scenarios("../features/example.feature")
 
-@given("the project is configured")
-def project_is_configured():
-    assert True
+          @given("the project is configured")
+          def project_is_configured():
+              assert True
 
-@then("the test should pass")
-def test_should_pass():
-    assert True
-EOF
+          @then("the test should pass")
+          def test_should_pass():
+              assert True
+          EOF
           fi
 
       - name: Run BDD tests and generate Cucumber JSON
