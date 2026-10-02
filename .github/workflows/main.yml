@@ -30,9 +30,6 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Gherkin linter
-        run: npx --yes gherkin-lint --version
-
       - name: Lint Gherkin feature files
         run: |
           mkdir -p features
