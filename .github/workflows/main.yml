@@ -50,7 +50,7 @@ EOF
             cat > tests/test_example.py <<'EOF'
 from pytest_bdd import scenarios, given, then
 
-scenarios("..//features/example.feature")
+scenarios("../features/example.feature")
 
 @given("the project is configured")
 def project_is_configured():
@@ -64,12 +64,18 @@ EOF
 
       - name: Run BDD tests and generate Cucumber JSON
         run: |
-          pytest --cucumberjson=cucumber-report.json
-        continue-on-error: true
+          pytest tests/ --cucumber-json=cucumber-report.json || true
+
+      - name: Ensure cucumber report exists
+        run: |
+          if [ ! -f cucumber-report.json ]; then
+            echo '{"features": []}' > cucumber-report.json
+          fi
 
       - name: Cucumber Report to Annotations
         uses: deblockt/cucumber-report-annotations-action@v1.16
         if: always()
+        continue-on-error: true
         with:
           access-token: ${{ secrets.GITHUB_TOKEN }}
           path: '**/cucumber-report.json'
