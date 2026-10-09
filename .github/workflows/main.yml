@@ -44,7 +44,7 @@ jobs:
           playwright install --with-deps chromium
 
       - name: Run BDD tests and generate Cucumber JSON
-        run: pytest tests/ --cucumber-json=cucumber-report.json
+        run: python -m pytest tests/ --cucumber-json=cucumber-report.json
 
       - name: Ensure cucumber report exists
         run: |
