@@ -14,16 +14,5 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install Gherkin Linter
-        run: npm install -g @cucumber/gherkin-utils
-
       - name: Lint Feature Files
-        run: |
-          echo "Auditing AI-generated BDD test definitions..."
-          # This checks all .feature files for proper syntax structure
-          npx gherkin-lint
+        run: npx --yes gherkin-lint --config .github/workflows/.gherkin-lintrc

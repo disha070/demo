@@ -2,6 +2,6 @@
   "no-unnamed-features": "on",
   "no-unnamed-scenarios": "on",
   "no-dupe-scenario-names": "on",
-  "indentation": ["on", 2],
+  "indentation": ["on", {"Feature": 0, "Scenario": 2, "Step": 4}],
   "no-trailing-spaces": "on"
 }

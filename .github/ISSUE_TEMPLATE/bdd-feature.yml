@@ -1,0 +1,35 @@
+name: BDD feature request
+description: Request a feature file with Gherkin acceptance scenarios
+title: "[BDD] "
+body:
+  - type: input
+    id: feature_name
+    attributes:
+      label: Feature name
+      description: Short name for the behavior this feature describes.
+      placeholder: Account sign-in
+    validations:
+      required: true
+  - type: textarea
+    id: user_story
+    attributes:
+      label: User story
+      description: Use one line for each part of the story.
+      placeholder: |
+        As a registered user
+        I want to sign in with my credentials
+        So that I can access my account
+    validations:
+      required: true
+  - type: textarea
+    id: scenarios
+    attributes:
+      label: Scenarios (Gherkin)
+      description: Include at least one Scenario and its Given/When/Then steps. Indent steps by two spaces here.
+      placeholder: |
+        Scenario: Successful sign-in
+          Given a registered user
+          When they submit valid credentials
+          Then they see their account
+    validations:
+      required: true

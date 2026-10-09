@@ -5,8 +5,6 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  issues:
-    types: [ opened, labeled ]
 
 jobs:
   build-and-annotate:
@@ -30,18 +28,6 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Create example feature if missing
-        run: |
-          mkdir -p features
-          if ! find features -name "*.feature" | grep -q .; then
-            cat > features/example.feature <<'EOF'
-          Feature: Example BDD workflow
-            Scenario: Example passing scenario
-              Given the project is configured
-              Then the test should pass
-          EOF
-          fi
-
       - name: Lint Gherkin feature files
         run: |
           if find features -name "*.feature" | grep -q .; then
@@ -57,28 +43,8 @@ jobs:
           pip install pytest pytest-bdd playwright
           playwright install --with-deps chromium
 
-      - name: Create example step definitions if missing
-        run: |
-          mkdir -p tests
-          if [ ! -f tests/test_example.py ]; then
-            cat > tests/test_example.py <<'EOF'
-          from pytest_bdd import scenarios, given, then
-
-          scenarios("../features/example.feature")
-
-          @given("the project is configured")
-          def project_is_configured():
-              assert True
-
-          @then("the test should pass")
-          def test_should_pass():
-              assert True
-          EOF
-          fi
-
       - name: Run BDD tests and generate Cucumber JSON
-        run: |
-          pytest tests/ --cucumber-json=cucumber-report.json || true
+        run: pytest tests/ --cucumber-json=cucumber-report.json
 
       - name: Ensure cucumber report exists
         run: |
