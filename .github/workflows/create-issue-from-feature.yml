@@ -1,0 +1,86 @@
+name: Create issue from feature file
+
+on:
+  workflow_dispatch:
+    inputs:
+      feature_path:
+        description: Path to the .feature file to convert into a GitHub issue
+        required: true
+        default: features/example.feature
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  create-issue:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Parse feature file
+        id: parse
+        shell: bash
+        env:
+          FEATURE_PATH: ${{ github.event.inputs.feature_path }}
+        run: |
+          set -euo pipefail
+
+          if [ ! -f "$FEATURE_PATH" ]; then
+            echo "Feature file not found: $FEATURE_PATH"
+            exit 1
+          fi
+
+          FEATURE_TITLE=$(grep '^Feature:' "$FEATURE_PATH" | head -n 1 | sed 's/^Feature: //')
+          if [ -z "$FEATURE_TITLE" ]; then
+            echo "Feature file does not contain a Feature: heading"
+            exit 1
+          fi
+
+          python - <<'PY'
+import os
+import re
+from pathlib import Path
+
+path = Path(os.environ["FEATURE_PATH"])
+feature_text = path.read_text(encoding="utf-8")
+feature_title = re.search(r"^Feature:\s*(.+)$", feature_text, re.MULTILINE)
+feature_name = feature_title.group(1).strip() if feature_title else path.stem
+story_lines = []
+for line in feature_text.splitlines():
+    stripped = line.strip()
+    if stripped.startswith("As ") or stripped.startswith("I want to ") or stripped.startswith("So that "):
+        story_lines.append(stripped)
+
+story_text = "\n".join(story_lines) if story_lines else "No user story was found in the feature file."
+body = (
+    f"## Feature\n{feature_name}\n\n"
+    f"## User story\n{story_text}\n\n"
+    f"## Gherkin\n```gherkin\n{feature_text}\n```"
+)
+with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+    fh.write(f"title={feature_name}\n")
+    fh.write("body<<EOF\n")
+    fh.write(body)
+    fh.write("\nEOF\n")
+PY
+
+      - name: Create issue from feature
+        uses: actions/github-script@v7
+        env:
+          ISSUE_TITLE: ${{ steps.parse.outputs.title }}
+          ISSUE_BODY: ${{ steps.parse.outputs.body }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const title = `[BDD] ${process.env.ISSUE_TITLE}`.trim();
+            const body = process.env.ISSUE_BODY || "Generated from a feature file.";
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+            });
