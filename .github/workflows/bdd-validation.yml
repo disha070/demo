@@ -1,18 +1,30 @@
-name: BDD Feature File Validation
+name: Gherkin Lint
 
 on:
   pull_request:
     branches: [ main, master ]
-    paths:
-      - '**/*.feature'
+  push:
+    branches: [ main, master ]
 
 jobs:
-  validate-gherkin:
+  gherkin-lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Lint Feature Files
-        run: npx --yes gherkin-lint --config .github/workflows/.gherkin-lintrc
+        run: |
+          if find features -name "*.feature" -print -quit | grep -q .; then
+            find features -name "*.feature" -print0 | xargs -0 -r npx --yes gherkin-lint --config .github/workflows/.gherkin-lintrc
+          else
+            echo "No feature files found. Skipping Gherkin lint."
+          fi
